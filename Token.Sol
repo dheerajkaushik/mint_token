@@ -1,0 +1,65 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract Token {
+    string public name;
+    string public symbol;
+    uint256 public totalSupply;
+    
+    
+
+    mapping(address => uint256) private balances;
+
+    address public owner;
+
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Mint(address indexed to, uint256 value);
+    event Burn(address indexed from, uint256 value);
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only owner have the authority to call mint function.");
+        _;
+    }
+
+    constructor() {
+        name = "21ct1090 Token";
+        symbol = "Symbol";
+        
+        totalSupply = 0; //initia supply 
+        owner = msg.sender;
+    }
+
+    function balanceOf(address account) external view returns (uint256) {
+        return balances[account];
+    
+    }
+
+    function transfer(address client, uint256 amount) external returns (bool) {
+        require(amount <= balances[msg.sender], "Insufficient balance.");
+
+        balances[msg.sender] -= amount;
+        balances[client] += amount;
+
+        emit Transfer(msg.sender, client, amount);
+        return true;
+    }
+
+
+    function mint(address to, uint256 amount) external onlyOwner {
+        totalSupply += amount;
+        balances[to] += amount;
+
+        emit Mint(to, amount);
+        emit Transfer(address(0), to, amount);
+    }
+
+    function burn(uint256 amount) external {
+        require(amount <= balances[msg.sender], "Insufficient balance.");
+
+        balances[msg.sender] -= amount;
+        totalSupply -= amount;
+
+        emit Burn(msg.sender, amount);
+        emit Transfer(msg.sender, address(0), amount);
+    }
+}
